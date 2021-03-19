@@ -156,6 +156,29 @@ describe('Umbra Hooks', () => {
     });
   });
 
+  it.only('should not call the hook when we do not use the AndCall method', async () => {
+    await mintAndSendToken(sender, receiver, '100');
+
+    await ctx.umbra.withdrawToken(acceptor, ctx.token.address, {
+      from: receiver,
+    });
+
+    const callData = await ctx.hook.lastCallData();
+
+    // call data in the mock trigger should still be zeroes
+    expect(fromWei(callData.amount)).to.equal('0');
+    expect(callData.stealthAddr).to.equal(AddressZero);
+    expect(callData.acceptor).to.equal(AddressZero);
+    expect(callData.tokenAddr).to.equal(AddressZero);
+    expect(callData.sponsor).to.equal(AddressZero);
+    expect(fromWei(callData.sponsorFee)).to.equal('0');
+    expect(callData.data).to.equal(null);
+
+    // the withdrawal transfer should still work
+    const balance = await ctx.token.balanceOf(acceptor);
+    expect(fromWei(balance)).to.equal('100');
+  });
+
   describe('Meta withdrawal + hooks', async () => {
     it('should call the hook contract when the stealth receiver withdraws via meta tx', async () => {
       await mintAndSendToken(sender, metaWallet.address, '100');
