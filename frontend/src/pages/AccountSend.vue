@@ -33,6 +33,8 @@
         placeholder="vitalik.eth"
         lazy-rules
         :rules="isValidId"
+        :isWarningHint="true"
+        :hint="warnIfConfusingENS()"
       />
 
       <!-- Identifier, advanced mode tooltip -->
@@ -174,6 +176,7 @@ import { round } from 'src/utils/utils';
 import { generatePaymentLink, parsePaymentLink } from 'src/utils/payment-links';
 import { Provider, TokenInfo } from 'components/models';
 import { ERC20_ABI } from 'src/utils/constants';
+import { isConfusing } from 'src/utils/unicode-confusing';
 
 function useSendForm() {
   const { advancedMode } = useSettingsStore();
@@ -272,6 +275,17 @@ function useSendForm() {
     if (paymentToken?.symbol) token.value = paymentToken;
     else token.value = tokenOptions.value[0];
   });
+
+  function warnIfConfusingENS() {
+    // Return true if nothing is provided
+    if (!recipientId.value) return '';
+
+    if (isConfusing(recipientId.value)) {
+      return 'We have detected a confusable character in the ENS name. Check the ENS name to avoid a potential scam.';
+    }
+
+    return '';
+  }
 
   // Validators
   async function isValidId(val: string | undefined) {
@@ -398,6 +412,7 @@ function useSendForm() {
     isSending,
     isValidForm,
     isValidId,
+    warnIfConfusingENS,
     isValidRecipientId,
     isValidTokenAmount,
     NATIVE_TOKEN,

@@ -6,7 +6,7 @@
       :autogrow="autogrow"
       :bg-color="bgColor"
       color="primary"
-      class="col q-my-sm"
+      class="col q-my-md"
       data-cy="base-input"
       :debounce="debounce"
       :dense="dense"
@@ -27,9 +27,9 @@
       @focus="showHint"
       @input="handleInput"
     >
-      <!-- 
+      <!--
       If we have a button, never show the loading slot because it makes the button jump left and right when the
-      loading slot is shown / hidden 
+      loading slot is shown / hidden
     -->
       <template v-if="appendButtonLabel && !$q.screen.xs" v-slot:loading></template>
       <template v-if="appendButtonLabel && !$q.screen.xs" v-slot:append>
@@ -154,6 +154,13 @@ export default Vue.extend({
       default: undefined,
     },
 
+    isWarningHint: {
+      // used to display a warning as a hint
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+
     label: {
       type: undefined,
       required: false,
@@ -232,8 +239,11 @@ export default Vue.extend({
     },
 
     hideHint() {
-      this.hintString = '';
-      this.$emit('blur', this.content);
+      // ensure hint is not hidden if it's a warning
+      if (!this.isWarningHint) {
+        this.hintString = '';
+        this.$emit('blur', this.content);
+      }
     },
 
     showHint() {
